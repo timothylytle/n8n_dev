@@ -18,6 +18,7 @@ func TestInfrastructureModules(t *testing.T) {
     hostedZoneName := requireEnv(t, "N8N_TEST_HOSTED_ZONE_NAME")
     domainName := requireEnv(t, "N8N_TEST_DOMAIN")
     sshKey := requireEnv(t, "N8N_TEST_SSH_KEY_NAME")
+    acmeEmail := requireEnv(t, "N8N_TEST_LETSENCRYPT_EMAIL")
     profile := getEnvDefault("N8N_TEST_AWS_PROFILE", "sandbox")
     region := getEnvDefault("N8N_TEST_AWS_REGION", "us-east-1")
     allowedSSH := parseCIDRS(getEnvDefault("N8N_TEST_ALLOWED_SSH_CIDR", "0.0.0.0/0"))
@@ -30,6 +31,7 @@ func TestInfrastructureModules(t *testing.T) {
             "hosted_zone_name": hostedZoneName,
             "domain_name":     domainName,
             "ssh_key_name":    sshKey,
+            "letsencrypt_email": acmeEmail,
             "aws_profile":     profile,
             "aws_region":      region,
             "allowed_ssh_cidr": allowedSSH,

@@ -25,6 +25,11 @@ locals {
     Project     = "n8n-poc"
     Environment = "sandbox"
   }, var.tags)
+  bootstrap_user_data = templatefile("${path.module}/user_data.tpl", {
+    domain_name        = var.domain_name
+    letsencrypt_email  = var.letsencrypt_email
+    bootstrap_contents = file("${path.module}/../scripts/user_data.sh")
+  })
 }
 
 module "network" {
@@ -43,7 +48,7 @@ module "compute" {
   ssh_key_name      = var.ssh_key_name
   enable_elastic_ip = var.enable_elastic_ip
   tags              = local.common_tags
-  user_data         = var.user_data
+  user_data         = local.bootstrap_user_data
 }
 
 module "dns" {

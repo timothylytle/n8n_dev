@@ -32,6 +32,11 @@ variable "domain_name" {
   type        = string
 }
 
+variable "letsencrypt_email" {
+  description = "Contact email used for Let's Encrypt registration."
+  type        = string
+}
+
 variable "ssh_key_name" {
   description = "Existing AWS EC2 key pair name for SSH access."
   type        = string
