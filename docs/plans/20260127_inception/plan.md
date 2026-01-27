@@ -178,7 +178,14 @@ Work executes in three sequential phases. Phase 1 creates the Terraform baseline
   - [x] 2026-01-27T14:25:00-0700 — Document terraform commands/usage in README per phase notes
 - [x] Phase 1: Terraform Infrastructure Baseline — 2026-01-27T14:26:00-0700
   - [x] 2026-01-27T15:22:02-0700 — Switch hosted zone input from ID to name via data lookup
-- [ ] Phase 2: Host Bootstrapping & Docker Stack
+- [x] Phase 2: Host Bootstrapping & Docker Stack — 2026-01-27T15:58:00-0700
+  - [x] 2026-01-27T15:42:30-0700 — Author scripts/user_data.sh installing Docker + directories
+  - [x] 2026-01-27T15:47:30-0700 — Template user_data via Terraform
+  - [x] 2026-01-27T15:52:00-0700 — Create Docker Compose stack (postgres/n8n/nginx/certbot)
+  - [x] 2026-01-27T15:52:15-0700 — Provide deploy/.env.example
+  - [x] 2026-01-27T15:52:30-0700 — Add nginx template + certbot integration
+  - [x] 2026-01-27T15:54:30-0700 — Implement integration test script for bootstrap verification
+  - [x] 2026-01-27T15:57:00-0700 — Update README with .env handling, user_data usage, restart procedures
 - [ ] Phase 3: Operationalization & Documentation
 
 ### 3.2 Decision Log
@@ -191,6 +198,12 @@ Work executes in three sequential phases. Phase 1 creates the Terraform baseline
 - **Decision:** Default AMI filter to Ubuntu 22.04 until 24.04 images propagate
   - Date: 2026-01-27
   - Rationale: `ubuntu-noble-24.04` AMIs are not yet published in some regions (e.g., us-west-2), so Terratest would fail; keep 22.04 default but allow overrides via variable.
+- **Decision:** Render nginx config with envsubst
+  - Date: 2026-01-27
+  - Rationale: Avoid hardcoding certificate paths by generating `n8n.conf` from a template that substitutes `N8N_HOST` at container start.
+- **Decision:** Gate SSH-based integration script with `N8N_INTEGRATION_ENABLED`
+  - Date: 2026-01-27
+  - Rationale: Prevent accidental SSH execution while making it easy to opt into persistence/health checks.
 
 ### 3.3 Surprises & Discoveries
 - **Observation:** Terraform provider plugins require elevated network access inside sandbox
