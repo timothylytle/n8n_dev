@@ -166,18 +166,28 @@ Work executes in three sequential phases. Phase 1 creates the Terraform baseline
 > **This document must describe not just the what but the why for almost everything.**
 
 ### 3.1 Progress
-- [ ] Phase 1: Terraform Infrastructure Baseline
+- [~] Phase 1: Terraform Infrastructure Baseline — 2026-01-27T13:39:59-0700
+  - [x] 2026-01-27T13:42:00-0700 — Scaffold Terraform directories (`infra/terraform/modules/...`)
+  - [x] 2026-01-27T13:47:00-0700 — Define Terraform variables/outputs skeleton across modules/root
+  - [x] 2026-01-27T13:49:00-0700 — Implement security group module
+  - [x] 2026-01-27T13:54:00-0700 — Implement compute module (EC2 + EIP wiring)
+  - [x] 2026-01-27T13:55:00-0700 — Implement DNS module for Route53 record
+  - [x] 2026-01-27T13:58:00-0700 — Wire modules in root Terraform configuration
+  - [x] 2026-01-27T14:00:00-0700 — Add terraform.tfvars.example and .gitignore entries
+  - [x] 2026-01-27T14:05:00-0700 — Add Terratest suite for modules
+  - [x] 2026-01-27T14:25:00-0700 — Document terraform commands/usage in README per phase notes
+- [x] Phase 1: Terraform Infrastructure Baseline — 2026-01-27T14:26:00-0700
 - [ ] Phase 2: Host Bootstrapping & Docker Stack
 - [ ] Phase 3: Operationalization & Documentation
 
 ### 3.2 Decision Log
-- **Decision:** _TBD_
-  - Date: YYYY-MM-DD
-  - Rationale: ...
+- **Decision:** Gate Terratest execution on `N8N_TERRATEST_ENABLED`
+  - Date: 2026-01-27
+  - Rationale: Prevent accidental AWS resource creation by requiring an explicit opt-in env var before tests run.
 
 ### 3.3 Surprises & Discoveries
-- **Observation:** _TBD_
-  - Evidence: ...
+- **Observation:** Terraform provider plugins require elevated network access inside sandbox
+  - Evidence: `terraform init`/`validate` failed until run with escalated permissions due to registry.terraform.io DNS restrictions.
 
 ### 3.4 Outcomes & Retrospective
 (To be filled after completion)
