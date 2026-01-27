@@ -5,9 +5,9 @@ aws_region  = "us-east-1"
 instance_type    = "t3.small"
 root_volume_size = 40
 
-domain_name   = "n8n.sandbox.example.com"
-hosted_zone_id = "Z123456789"
-ssh_key_name    = "sandbox-key"
+domain_name       = "n8n.sandbox.example.com"
+hosted_zone_name  = "example.com"
+ssh_key_name      = "sandbox-key"
 allowed_ssh_cidr = [
   "0.0.0.0/0",
 ]

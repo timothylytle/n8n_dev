@@ -14,6 +14,11 @@ data "aws_subnets" "selected" {
   }
 }
 
+data "aws_route53_zone" "target" {
+  name         = var.hosted_zone_name
+  private_zone = false
+}
+
 locals {
   effective_subnet_id = var.subnet_id != null ? var.subnet_id : data.aws_subnets.selected.ids[0]
   common_tags = merge({
@@ -43,7 +48,7 @@ module "compute" {
 
 module "dns" {
   source      = "./modules/dns"
-  zone_id     = var.hosted_zone_id
+  zone_id     = data.aws_route53_zone.target.zone_id
   record_name = var.domain_name
   target_ip   = module.compute.public_ip
 }

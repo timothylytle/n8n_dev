@@ -50,5 +50,5 @@ variable "ami_owner" {
 variable "ami_name_filter" {
   type        = string
   description = "Name filter used to select the Ubuntu AMI."
-  default     = "ubuntu/images/hvm-ssd/ubuntu-jammy-24.04-amd64-server-*"
+  default     = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
 }

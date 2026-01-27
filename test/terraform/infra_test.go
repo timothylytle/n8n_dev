@@ -15,19 +15,19 @@ func TestInfrastructureModules(t *testing.T) {
         t.Skip("N8N_TERRATEST_ENABLED not set; skipping integration test")
     }
 
-    hostedZoneID := requireEnv(t, "N8N_TEST_HOSTED_ZONE_ID")
+    hostedZoneName := requireEnv(t, "N8N_TEST_HOSTED_ZONE_NAME")
     domainName := requireEnv(t, "N8N_TEST_DOMAIN")
     sshKey := requireEnv(t, "N8N_TEST_SSH_KEY_NAME")
     profile := getEnvDefault("N8N_TEST_AWS_PROFILE", "sandbox")
     region := getEnvDefault("N8N_TEST_AWS_REGION", "us-east-1")
     allowedSSH := parseCIDRS(getEnvDefault("N8N_TEST_ALLOWED_SSH_CIDR", "0.0.0.0/0"))
 
-    terraformDir := filepath.Clean(filepath.Join("..", "infra", "terraform"))
+    terraformDir := filepath.Clean(filepath.Join("..", "..", "infra", "terraform"))
 
     terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
         TerraformDir: terraformDir,
         Vars: map[string]interface{}{
-            "hosted_zone_id":  hostedZoneID,
+            "hosted_zone_name": hostedZoneName,
             "domain_name":     domainName,
             "ssh_key_name":    sshKey,
             "aws_profile":     profile,
