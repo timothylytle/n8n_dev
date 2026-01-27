@@ -9,7 +9,7 @@ Provision AWS infrastructure for a self-hosted n8n proof-of-concept stack. The p
    aws_profile     = "sandbox"
    aws_region      = "us-east-1"
    domain_name     = "n8n.sandbox.example.com"
-   hosted_zone_id  = "Z123456789"
+   hosted_zone_name = "example.com"
    ssh_key_name    = "sandbox-key"
    allowed_ssh_cidr = ["0.0.0.0/0"]
    ```
@@ -30,7 +30,7 @@ Provision AWS infrastructure for a self-hosted n8n proof-of-concept stack. The p
 5. Run Terratest suite (requires temporary AWS resources). Set env vars first:
    ```bash
    export N8N_TERRATEST_ENABLED=1
-   export N8N_TEST_HOSTED_ZONE_ID=Z123456789
+   export N8N_TEST_HOSTED_ZONE_NAME=example.com
    export N8N_TEST_DOMAIN=n8n.sandbox.example.com
    export N8N_TEST_SSH_KEY_NAME=sandbox-key
    export N8N_TEST_AWS_PROFILE=sandbox

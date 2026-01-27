@@ -177,6 +177,7 @@ Work executes in three sequential phases. Phase 1 creates the Terraform baseline
   - [x] 2026-01-27T14:05:00-0700 — Add Terratest suite for modules
   - [x] 2026-01-27T14:25:00-0700 — Document terraform commands/usage in README per phase notes
 - [x] Phase 1: Terraform Infrastructure Baseline — 2026-01-27T14:26:00-0700
+  - [x] 2026-01-27T15:22:02-0700 — Switch hosted zone input from ID to name via data lookup
 - [ ] Phase 2: Host Bootstrapping & Docker Stack
 - [ ] Phase 3: Operationalization & Documentation
 
@@ -184,10 +185,18 @@ Work executes in three sequential phases. Phase 1 creates the Terraform baseline
 - **Decision:** Gate Terratest execution on `N8N_TERRATEST_ENABLED`
   - Date: 2026-01-27
   - Rationale: Prevent accidental AWS resource creation by requiring an explicit opt-in env var before tests run.
+- **Decision:** Prefer hosted zone name input with Route53 data lookup
+  - Date: 2026-01-27
+  - Rationale: Simplifies operator inputs and avoids needing to hunt hosted zone IDs while ensuring DNS resides in same AWS account.
+- **Decision:** Default AMI filter to Ubuntu 22.04 until 24.04 images propagate
+  - Date: 2026-01-27
+  - Rationale: `ubuntu-noble-24.04` AMIs are not yet published in some regions (e.g., us-west-2), so Terratest would fail; keep 22.04 default but allow overrides via variable.
 
 ### 3.3 Surprises & Discoveries
 - **Observation:** Terraform provider plugins require elevated network access inside sandbox
   - Evidence: `terraform init`/`validate` failed until run with escalated permissions due to registry.terraform.io DNS restrictions.
+- **Observation:** Canonical Ubuntu 24.04 AMIs unavailable in sandbox region
+  - Evidence: Terratest apply failed with `data.aws_ami.ubuntu` "Your query returned no results" in `us-west-2` when filtering for `ubuntu-noble-24.04`, necessitating fallback.
 
 ### 3.4 Outcomes & Retrospective
 (To be filled after completion)
