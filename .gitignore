@@ -35,3 +35,13 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Project-specific artifacts
+infra/terraform/.terraform/
+infra/terraform/terraform.tfstate*
+infra/terraform/*.tfvars
+.env
+deploy/.env
+ansible/inventory/
+.gomodcache/
+.gopath/
