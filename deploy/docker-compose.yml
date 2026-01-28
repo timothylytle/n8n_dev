@@ -1,0 +1,117 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: n8n-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - app_net
+
+  n8n:
+    image: n8nio/n8n:1.67.1
+    container_name: n8n-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      N8N_HOST: ${N8N_HOST}
+      N8N_PORT: 5678
+      N8N_PROTOCOL: ${N8N_PROTOCOL}
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      GENERIC_TIMEZONE: ${TZ}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - app_net
+
+  nginx:
+    image: nginx:1.25
+    container_name: n8n-nginx
+    restart: unless-stopped
+    depends_on:
+      - n8n
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - certbot_challenges:/var/www/certbot
+      - letsencrypt:/etc/letsencrypt
+    environment:
+      - N8N_HOST=${N8N_HOST}
+    networks:
+      - app_net
+    command:
+      - /bin/sh
+      - -c
+      - |
+        envsubst '$$N8N_HOST' < /etc/nginx/templates/n8n.conf.template > /etc/nginx/conf.d/n8n.conf;
+        CERT_DIR="/etc/letsencrypt/live/$$N8N_HOST";
+        if [ ! -f "$$CERT_DIR/fullchain.pem" ]; then
+          echo "Generating temporary self-signed certificate for $$N8N_HOST";
+          mkdir -p "$$CERT_DIR";
+          openssl req -x509 -nodes -newkey rsa:2048 \
+            -subj "/CN=$$N8N_HOST" \
+            -keyout "$$CERT_DIR/privkey.pem" \
+            -out "$$CERT_DIR/fullchain.pem" \
+            -days 1 >/tmp/selfsigned.log 2>&1 || cat /tmp/selfsigned.log;
+        fi;
+        nginx -g 'daemon off;'
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: n8n-certbot
+    restart: unless-stopped
+    depends_on:
+      - nginx
+    environment:
+      - N8N_HOST=${N8N_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - CERTBOT_RENEW_INTERVAL=${CERTBOT_RENEW_INTERVAL:-12h}
+      - CERTBOT_STAGING=${CERTBOT_STAGING:-0}
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot_challenges:/var/www/certbot
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        trap exit TERM;
+        while :; do
+          certbot certonly \
+            --webroot -w /var/www/certbot \
+            --non-interactive --agree-tos \
+            --email "$$LETSENCRYPT_EMAIL" \
+            -d "$$N8N_HOST" \
+            $$( [ "$$CERTBOT_STAGING" = "1" ] && printf -- "--staging" );
+          sleep "$$CERTBOT_RENEW_INTERVAL";
+        done
+
+networks:
+  app_net:
+    driver: bridge
+
+volumes:
+  pg_data:
+  n8n_data:
+  letsencrypt:
+  certbot_challenges:

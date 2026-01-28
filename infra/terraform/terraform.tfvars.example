@@ -1,0 +1,24 @@
+# Sandbox profile/region keep production safe
+aws_profile = "sandbox"
+aws_region  = "us-east-1"
+
+instance_type    = "t3.small"
+root_volume_size = 40
+
+domain_name        = "n8n.sandbox.example.com"
+hosted_zone_name   = "example.com"
+letsencrypt_email  = "ops@example.com"
+ssh_key_name       = "sandbox-key"
+allowed_ssh_cidr = [
+  "0.0.0.0/0",
+]
+
+tags = {
+  Environment = "sandbox"
+  Owner       = "automation"
+}
+
+# Optional overrides
+# vpc_id   = "vpc-abc123"
+# subnet_id = "subnet-abc123"
+# enable_elastic_ip = true
