@@ -63,9 +63,19 @@ services:
     command:
       - /bin/sh
       - -c
-      - >
-        envsubst '$$N8N_HOST' < /etc/nginx/templates/n8n.conf.template > /etc/nginx/conf.d/n8n.conf
-        && nginx -g 'daemon off;'
+      - |
+        envsubst '$$N8N_HOST' < /etc/nginx/templates/n8n.conf.template > /etc/nginx/conf.d/n8n.conf;
+        CERT_DIR="/etc/letsencrypt/live/$$N8N_HOST";
+        if [ ! -f "$$CERT_DIR/fullchain.pem" ]; then
+          echo "Generating temporary self-signed certificate for $$N8N_HOST";
+          mkdir -p "$$CERT_DIR";
+          openssl req -x509 -nodes -newkey rsa:2048 \
+            -subj "/CN=$$N8N_HOST" \
+            -keyout "$$CERT_DIR/privkey.pem" \
+            -out "$$CERT_DIR/fullchain.pem" \
+            -days 1 >/tmp/selfsigned.log 2>&1 || cat /tmp/selfsigned.log;
+        fi;
+        nginx -g 'daemon off;'
 
   certbot:
     image: certbot/certbot:latest

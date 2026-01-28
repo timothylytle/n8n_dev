@@ -71,6 +71,7 @@ Provision AWS infrastructure for a self-hosted n8n proof-of-concept stack. The p
    docker compose --env-file .env up -d
    docker compose --env-file .env ps
    ```
+   Nginx bootstraps with a short-lived self-signed certificate so the HTTP challenge can run; after certbot issues the real cert, reload Nginx (`docker compose restart nginx`) to pick it up.
 5. Restart procedure (preserves Postgres/n8n volumes):
    ```bash
    docker compose --env-file .env down
