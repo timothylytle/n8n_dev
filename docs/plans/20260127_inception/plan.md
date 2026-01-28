@@ -30,7 +30,7 @@ Work executes in three sequential phases. Phase 1 creates the Terraform baseline
 
 ### 1.2 Proposed Architecture (High-level)
 1. **Terraform Layer** (`infra/terraform`): root module orchestrates `modules/network`, `modules/compute`, `modules/dns`. Outputs expose public IP, instance ID, and domain URL. Backend remains local; tfvars specify sandbox credentials.
-2. **Bootstrap Layer** (`scripts/user_data.sh`, optional `ansible/`): user_data installs Docker Engine + compose plugin, lays out `/opt/n8n` directory tree, fetches compose assets, and runs initial `docker compose pull`. Ansible can rerun idempotently if user_data insufficient.
+2. **Bootstrap Layer** (`infra/terraform/files/user_data.sh`, optional `ansible/`): user_data installs Docker Engine + compose plugin, lays out `/opt/n8n` directory tree, fetches compose assets, and runs initial `docker compose pull`. Ansible can rerun idempotently if user_data insufficient.
 3. **Runtime Layer** (`deploy/docker-compose.yml`, `deploy/nginx/*`): Docker Compose network `app_net` connects services `postgres`, `n8n`, `nginx`, `certbot`. Named volumes persist Postgres data, n8n config, and TLS certs. Nginx proxies HTTPS to n8n; certbot handles ACME challenges over HTTP.
 
 ### 1.3 Data Model & Types (Signatures, not full code)
@@ -63,7 +63,7 @@ Work executes in three sequential phases. Phase 1 creates the Terraform baseline
 - `infra/terraform/modules/network`: defines security group with inbound 22/80/443, egress all. Outputs SG ID.
 - `infra/terraform/modules/compute`: EC2 resource, IAM instance profile (if SSM desired), Elastic IP association, user_data rendered via `templatefile`. Outputs instance metadata.
 - `infra/terraform/modules/dns`: Route53 `aws_route53_record` -> domain + Elastic IP.
-- `scripts/user_data.sh`: Bash script using `#!/bin/bash`, `set -euo pipefail`, apt installs docker components, `systemctl enable docker`, creates directories, copies compose bundle from repo or remote storage.
+- `infra/terraform/files/user_data.sh`: Bash script using `#!/bin/bash`, `set -euo pipefail`, apt installs docker components, `systemctl enable docker`, creates directories, copies compose bundle from repo or remote storage.
 - `ansible/playbooks/docker.yml`: optional idempotent tasks (scope: host) running `community.docker.docker_compose`. Inventories excluded from repo.
 - `deploy/docker-compose.yml`: YAML `version: "3.9"` with service definitions, environment references to `.env`. `depends_on` ensures Postgres before n8n.
 - `deploy/nginx/conf.d/n8n.conf`: server blocks for `80` (redirect/ACME) and `443` (proxy). Example snippet included in README.
@@ -179,7 +179,7 @@ Work executes in three sequential phases. Phase 1 creates the Terraform baseline
 - [x] Phase 1: Terraform Infrastructure Baseline — 2026-01-27T14:26:00-0700
   - [x] 2026-01-27T15:22:02-0700 — Switch hosted zone input from ID to name via data lookup
 - [x] Phase 2: Host Bootstrapping & Docker Stack — 2026-01-27T15:58:00-0700
-  - [x] 2026-01-27T15:42:30-0700 — Author scripts/user_data.sh installing Docker + directories
+  - [x] 2026-01-27T15:42:30-0700 — Author bootstrap script (infra/terraform/files/user_data.sh)
   - [x] 2026-01-27T15:47:30-0700 — Template user_data via Terraform
   - [x] 2026-01-27T15:52:00-0700 — Create Docker Compose stack (postgres/n8n/nginx/certbot)
   - [x] 2026-01-27T15:52:15-0700 — Provide deploy/.env.example
@@ -209,6 +209,9 @@ Work executes in three sequential phases. Phase 1 creates the Terraform baseline
 - **Decision:** Gate SSH-based integration script with `N8N_INTEGRATION_ENABLED`
   - Date: 2026-01-27
   - Rationale: Prevent accidental SSH execution while making it easy to opt into persistence/health checks.
+- **Decision:** Use official Docker apt repo inside user_data
+  - Date: 2026-01-27
+  - Rationale: Ubuntu archives in some regions lack `docker-compose-plugin`; pulling Docker CE packages from Docker’s repository ensures consistent installs.
 
 ### 3.3 Surprises & Discoveries
 - **Observation:** Terraform provider plugins require elevated network access inside sandbox

@@ -28,7 +28,7 @@ locals {
   bootstrap_user_data = templatefile("${path.module}/user_data.tpl", {
     domain_name        = var.domain_name
     letsencrypt_email  = var.letsencrypt_email
-    bootstrap_contents = file("${path.module}/../scripts/user_data.sh")
+    bootstrap_contents = file("${path.module}/files/user_data.sh")
   })
 }
 

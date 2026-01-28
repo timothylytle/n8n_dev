@@ -13,7 +13,7 @@ Provision the EC2 host runtime environment via user_data/Ansible and deploy the 
 - Integration test script (bash or Molecule) verifying Docker installed, containers run, and persistence across restarts.
 
 ## Tasks
-- [ ] Author `scripts/user_data.sh` (or similar) using `#!/bin/bash` + `set -euo pipefail`, installing Docker + compose, enabling services, creating directories.
+- [ ] Author `infra/terraform/files/user_data.sh` (or similar) using `#!/bin/bash` + `set -euo pipefail`, installing Docker + compose, enabling services, creating directories.
 - [ ] Template user_data via Terraform `templatefile` to inject domain/email variables.
 - [ ] Create Docker Compose file `deploy/docker-compose.yml` with services, volumes, network `app_net`, and `depends_on` ordering.
 - [ ] Provide `.env.example` at root or `deploy/.env.example`, listing required variables (`POSTGRES_PASSWORD`, `N8N_HOST`, `N8N_ENCRYPTION_KEY`, etc.).

@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 
-SCRIPT_PATH="scripts/user_data.sh"
+SCRIPT_PATH="infra/terraform/files/user_data.sh"
 
 if [[ ! -f "${SCRIPT_PATH}" ]]; then
   echo "ERROR: ${SCRIPT_PATH} is missing"

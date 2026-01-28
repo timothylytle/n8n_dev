@@ -49,8 +49,10 @@ Provision AWS infrastructure for a self-hosted n8n proof-of-concept stack. The p
 `.tfstate`, `.tfvars`, and `.env` files are excluded via `.gitignore`. Keep secrets out of version control.
 
 ## Phase 2 Quickstart (Docker Stack)
-1. Terraform injects `scripts/user_data.sh` via the `letsencrypt_email` variable, so newly created EC2 hosts already have Docker and `/opt/n8n` prepared:
+1. Terraform injects `infra/terraform/files/user_data.sh` via the `letsencrypt_email` variable, so newly created EC2 hosts already have Docker and `/opt/n8n` prepared:
    ```bash
+   eval "$(ssh-agent -s)"
+   ssh-add <path/ssh/key.pem>
    ssh ubuntu@<instance-ip> "docker --version && ls /opt/n8n"
    ```
 2. Copy deployment assets (or bake them into an AMI/image):
