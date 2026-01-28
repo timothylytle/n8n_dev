@@ -91,3 +91,29 @@ Provision AWS infrastructure for a self-hosted n8n proof-of-concept stack. The p
    export N8N_INTEGRATION_SSH_KEY=~/.ssh/your-key.pem
    bash tests/integration/bootstrap.sh
    ```
+8. Workflow validation steps live in [docs/runbook.md](docs/runbook.md).
+
+## Operations & Troubleshooting
+- **Logs & Monitoring**
+  - Application logs: `docker compose logs -f n8n`; database logs: `docker compose logs -f postgres`; proxy/cert logs: `docker compose logs -f nginx` and `certbot`.
+  - Host diagnostics: `journalctl -u docker -n 200`, `df -h /var /opt/n8n`. Consider adding CloudWatch/log aggregation if long-term monitoring is needed.
+- **Workflow Verification**
+  - After deploying, log into `https://<domain>` and create a simple scheduled workflow (e.g., Cron trigger + HTTP request). Ensure it runs as expected.
+  - Persistence check: `docker compose exec -T n8n /bin/sh -c 'echo ok > ~/.n8n/tests/marker'`, run `docker compose restart n8n`, and confirm the marker still exists.
+- **Backups & Recovery**
+  - Postgres volume (`pg_data`) holds workflow data; snapshot by running `docker compose down` and copying `/opt/n8n/postgres`, or use `pg_dump` inside the container.
+  - n8n configuration sits in `n8n_data`; copy `/opt/n8n` regularly or mount to dedicated storage.
+- **Scaling Guidance**
+  - Increase `instance_type`, `root_volume_size`, or Postgres settings via terraform vars and compose overrides if workflows grow.
+  - For HA or managed DB, replace Postgres service with RDS and update env vars accordingly.
+- **Common Issues**
+  - Let’s Encrypt failures: enable staging mode (`CERTBOT_STAGING=1`) until DNS propagates, then rerun certbot in production mode.
+  - Port conflicts: ensure no other service listens on 80/443; stop Apache/other proxies if installed by default images.
+  - Docker not starting: `sudo systemctl status docker`; re-run user_data chores or enable with `sudo systemctl enable docker`.
+  - DNS caching delays: `dig +short <domain>` should match the Elastic IP before attempting cert issuance.
+
+## Known Limitations
+- Single EC2 host; no multi-AZ or auto-scaling—outages restart only via Docker restart policies.
+- Local Docker volumes only; no automated backups or snapshots—export workflows manually or run `pg_dump`.
+- n8n credentials/SSO configuration must be handled manually in the UI after deployment.
+- Certbot uses HTTP-01 challenges; DNS-01/alternate validation is not implemented.

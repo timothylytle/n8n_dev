@@ -166,7 +166,7 @@ Work executes in three sequential phases. Phase 1 creates the Terraform baseline
 > **This document must describe not just the what but the why for almost everything.**
 
 ### 3.1 Progress
-- [~] Phase 1: Terraform Infrastructure Baseline — 2026-01-27T13:39:59-0700
+- [x] Phase 1: Terraform Infrastructure Baseline — 2026-01-27T13:39:59-0700
   - [x] 2026-01-27T13:42:00-0700 — Scaffold Terraform directories (`infra/terraform/modules/...`)
   - [x] 2026-01-27T13:47:00-0700 — Define Terraform variables/outputs skeleton across modules/root
   - [x] 2026-01-27T13:49:00-0700 — Implement security group module
@@ -186,7 +186,12 @@ Work executes in three sequential phases. Phase 1 creates the Terraform baseline
   - [x] 2026-01-27T15:52:30-0700 — Add nginx template + certbot integration
   - [x] 2026-01-27T15:54:30-0700 — Implement integration test script for bootstrap verification
   - [x] 2026-01-27T15:57:00-0700 — Update README with .env handling, user_data usage, restart procedures
-- [ ] Phase 3: Operationalization & Documentation
+- [~] Phase 3: Operationalization & Documentation — 2026-01-27T16:00:00-0700
+  - [x] 2026-01-27T16:05:00-0700 — Expand README operational sections (prereqs, deployment, troubleshooting)
+  - [x] 2026-01-27T16:07:30-0700 — Add workflow runbook / scheduling verification doc
+  - [x] 2026-01-27T16:10:00-0700 — Document logging/monitoring guidance + cert renewal fallback
+  - [x] 2026-01-27T16:11:00-0700 — Capture known limitations/non-goals in README
+  - [x] 2026-01-27T16:11:30-0700 — Re-run Terratest (go test ./...) and gated integration script
 
 ### 3.2 Decision Log
 - **Decision:** Gate Terratest execution on `N8N_TERRATEST_ENABLED`
